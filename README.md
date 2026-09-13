@@ -1,4 +1,4 @@
-# panos-bootstrap
+# panos-bootstrap-update
 
 Applies a small set of baseline `deviceconfig system` settings to one or more
 Palo Alto firewalls over the PAN-OS XML API, commits, and logs the result per
@@ -29,8 +29,8 @@ written to a CSV report with the step that failed and the reason.
 ## Inventory
 
 Devices are read from a text file, one management IP per line. Blank lines and
-anything after `#` are ignored, and duplicate entries are skipped. See
-`device_inventory.txt`:
+anything after `#` are ignored, and duplicate entries are skipped.
+`device_inventory.txt` is an example of the format:
 
 ```
 # One firewall management IP per line. Lines starting with # are ignored.
@@ -38,11 +38,12 @@ anything after `#` are ignored, and duplicate entries are skipped. See
 10.10.20.1
 ```
 
-By default the script reads `devices.txt` from the current directory. Pass a
-different file as the first argument to run a specific batch.
+By default the script reads `devices.txt` from the current directory. Either
+copy the example to `devices.txt` and add your devices, or pass any inventory
+file as the first argument to run a specific batch (see [Running](#running)).
 
 `devices.txt` and failure reports are excluded from git so device IPs are not
-committed.
+committed. Do not commit real IPs to `device_inventory.txt`.
 
 ## Configuration
 
@@ -56,7 +57,7 @@ Credentials and tuning are set at the top of `panos_bootstrap_update.py`.
 | `TIMEOUT` | Per-request timeout in seconds |
 | `COMMIT_POLL` | Seconds between commit job status checks |
 | `COMMIT_TIMEOUT` | Abandon a commit job after this many seconds |
-| `LOG_FILE` | Log file name |
+| `LOG_FILE` | Log file name, relative to the current directory, or a full path |
 
 Example:
 
@@ -71,17 +72,18 @@ The script exits immediately if the credentials are still set to `CHANGE_ME`.
 
 ```bash
 pip install requests
-python3 panos_bootstrap_update.py                  # uses devices.txt
-python3 panos_bootstrap_update.py batch1.txt       # uses a specific inventory file
+python3 panos_bootstrap_update.py                          # uses devices.txt
+python3 panos_bootstrap_update.py device_inventory.txt     # uses a specific inventory file
 ```
 
 Exit code is `0` if every device succeeded, `1` if any failed.
 
 ## Output
 
-Progress is written to the terminal and appended to `panos_bootstrap.log` in
-the directory the script is run from. Each line is timestamped and prefixed
-with the firewall IP:
+Progress, including commit job status updates, is written to the terminal and
+appended to `panos_bootstrap_update.log` in the directory the script is run
+from. The log is appended to on every run, so earlier runs are kept. Each line
+is timestamped and prefixed with the firewall IP:
 
 ```
 2026-01-14 09:12:03,114 INFO    === 10.10.10.1 ===

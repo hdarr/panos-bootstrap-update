@@ -24,7 +24,7 @@ VERIFY_TLS = False
 TIMEOUT = 30
 COMMIT_POLL = 10          # seconds between job status checks
 COMMIT_TIMEOUT = 600      # give up on a commit after this long
-LOG_FILE = "panos_bootstrap.log"
+LOG_FILE = "panos_bootstrap_update.log"
 
 SYSTEM_XPATH = "/config/devices/entry[@name='localhost.localdomain']/deviceconfig/system"
 
