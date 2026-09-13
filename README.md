@@ -47,7 +47,7 @@ FIREWALL_IPS = [
     "10.10.20.1",
 ]
 
-USERNAME = "apiadmin"
+USERNAME = "yourusername"
 PASSWORD = "yourpassword"
 ```
 
@@ -70,7 +70,7 @@ with the firewall IP:
 
 ```
 2026-01-14 09:12:03,114 INFO    === 10.10.10.1 ===
-2026-01-14 09:12:03,115 INFO    10.10.10.1: requesting API key as user 'apiadmin'
+2026-01-14 09:12:03,115 INFO    10.10.10.1: requesting API key as user 'yourusername'
 2026-01-14 09:12:03,842 INFO    10.10.10.1: API key retrieved
 2026-01-14 09:12:04,201 INFO    10.10.10.1: setting dhcp-client options
 2026-01-14 09:12:04,655 INFO    10.10.10.1: disabling IPv6
