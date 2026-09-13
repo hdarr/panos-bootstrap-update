@@ -30,7 +30,7 @@ written to a CSV report with the step that failed and the reason.
 
 Devices are read from a text file, one management IP per line. Blank lines and
 anything after `#` are ignored, and duplicate entries are skipped. See
-`devices.example.txt`:
+`device_inventory.txt`:
 
 ```
 # One firewall management IP per line. Lines starting with # are ignored.
