@@ -46,7 +46,7 @@ committed.
 
 ## Configuration
 
-Credentials and tuning are set at the top of `panos_bootstrap.py`.
+Credentials and tuning are set at the top of `panos_bootstrap_update.py`.
 
 | Setting | Purpose |
 | --- | --- |
@@ -71,8 +71,8 @@ The script exits immediately if the credentials are still set to `CHANGE_ME`.
 
 ```bash
 pip install requests
-python3 panos_bootstrap.py                  # uses devices.txt
-python3 panos_bootstrap.py batch1.txt       # uses a specific inventory file
+python3 panos_bootstrap_update.py                  # uses devices.txt
+python3 panos_bootstrap_update.py batch1.txt       # uses a specific inventory file
 ```
 
 Exit code is `0` if every device succeeded, `1` if any failed.
@@ -125,7 +125,7 @@ To retry after fixing the issues, pass the report straight back in as the
 inventory:
 
 ```bash
-python3 panos_bootstrap.py failed_devices_20260114_091216.csv
+python3 panos_bootstrap_update.py failed_devices_20260114_091216.csv
 ```
 
 Re-running against a device that already succeeded is safe; it applies the
