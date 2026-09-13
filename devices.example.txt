@@ -1,0 +1,3 @@
+# One firewall management IP per line. Lines starting with # are ignored.
+10.10.10.1
+10.10.20.1

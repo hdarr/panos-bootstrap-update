@@ -11,9 +11,10 @@ Per firewall the script will:
    `accept-dhcp-domain`, `accept-dhcp-hostname`.
 3. Set `ipv6-enable` to `no`.
 4. Commit, then poll the commit job until it finishes.
-5. Log the outcome and move on to the next IP in the list.
+5. Log the outcome and move on to the next device in the inventory.
 
-A failure on one device is logged and does not stop the run.
+A failure on one device is logged and does not stop the run. Failed devices are
+written to a CSV report with the step that failed and the reason.
 
 ## Prerequisites
 
@@ -25,13 +26,31 @@ A failure on one device is logged and does not stop the run.
   password, and with XML API access permitted
 - The management interface must allow HTTPS in its interface management profile
 
+## Inventory
+
+Devices are read from a text file, one management IP per line. Blank lines and
+anything after `#` are ignored, and duplicate entries are skipped. See
+`devices.example.txt`:
+
+```
+# One firewall management IP per line. Lines starting with # are ignored.
+10.10.10.1
+10.10.20.1
+```
+
+By default the script reads `devices.txt` from the current directory. Pass a
+different file as the first argument to run a specific batch.
+
+`devices.txt` and failure reports are excluded from git so device IPs are not
+committed.
+
 ## Configuration
 
-Everything is set at the top of `panos_bootstrap.py`.
+Credentials and tuning are set at the top of `panos_bootstrap.py`.
 
 | Setting | Purpose |
 | --- | --- |
-| `FIREWALL_IPS` | List of management IPs to configure |
+| `DEFAULT_INVENTORY` | Inventory file used when no argument is given |
 | `USERNAME` / `PASSWORD` | Shared admin credentials — both default to `CHANGE_ME` |
 | `VERIFY_TLS` | `False` by default, for firewalls using self-signed certificates |
 | `TIMEOUT` | Per-request timeout in seconds |
@@ -42,11 +61,6 @@ Everything is set at the top of `panos_bootstrap.py`.
 Example:
 
 ```python
-FIREWALL_IPS = [
-    "10.10.10.1",
-    "10.10.20.1",
-]
-
 USERNAME = "yourusername"
 PASSWORD = "yourpassword"
 ```
@@ -57,7 +71,8 @@ The script exits immediately if the credentials are still set to `CHANGE_ME`.
 
 ```bash
 pip install requests
-python3 panos_bootstrap.py
+python3 panos_bootstrap.py                  # uses devices.txt
+python3 panos_bootstrap.py batch1.txt       # uses a specific inventory file
 ```
 
 Exit code is `0` if every device succeeded, `1` if any failed.
@@ -81,13 +96,49 @@ with the firewall IP:
 2026-01-14 09:12:15,690 INFO    10.10.10.1: SUCCESS
 ```
 
-A summary line at the end gives the success and failure counts, followed by the
-IPs of any devices that failed.
+A failed device is logged with the step it failed at and the reason:
+
+```
+2026-01-14 09:12:16,002 ERROR   10.10.20.1: FAILED at step 'login' - API error (HTTP 403): Invalid Credential
+```
+
+The run ends with a summary of success and failure counts and the IPs of any
+failed devices.
+
+### Failure report
+
+If any device fails, a CSV named `failed_devices_<YYYYMMDD_HHMMSS>.csv` is
+written to the current directory:
+
+```
+ip,step,reason
+10.10.20.1,login,API error (HTTP 403): Invalid Credential
+10.10.30.1,login,connection error: ... timed out
+10.10.40.1,set dhcp-client,API error (HTTP 200): <message from firewall>
+10.10.50.1,commit,commit job 7 finished with result FAIL: <validation details>
+```
+
+Steps are `login`, `set dhcp-client`, `disable ipv6` and `commit`. The reason
+is the connection error or the error message returned by the firewall.
+
+To retry after fixing the issues, pass the report straight back in as the
+inventory:
+
+```bash
+python3 panos_bootstrap.py failed_devices_20260114_091216.csv
+```
+
+Re-running against a device that already succeeded is safe; it applies the
+same values again.
 
 ## Notes
 
+- Devices are processed one at a time, so a large batch takes roughly the sum of
+  each device's commit time. Size batches to fit the change window.
 - Requests are sent as HTTP POST, so the password and API key do not appear in
   the firewall's URI logs.
+- Each device gets a single login attempt per run, so the script will not lock
+  out the account through repeated retries.
 - The commit is a full commit of all pending changes on the device. If someone
   has uncommitted work in the candidate config, it will be committed too. Check
   before running against production.
