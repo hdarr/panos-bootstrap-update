@@ -14,7 +14,7 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-DEFAULT_INVENTORY = "devices.txt"
+DEFAULT_INVENTORY = "device_inventory.txt"
 
 # Common credentials across all devices
 USERNAME = "CHANGE_ME"

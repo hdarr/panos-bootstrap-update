@@ -38,9 +38,9 @@ anything after `#` are ignored, and duplicate entries are skipped.
 10.10.20.1
 ```
 
-By default the script reads `devices.txt` from the current directory. Either
-copy the example to `devices.txt` and add your devices, or pass any inventory
-file as the first argument to run a specific batch (see [Running](#running)).
+By default the script reads `device_inventory.txt` from the current directory.
+Replace the example IPs with your devices, or pass any inventory file as the
+first argument to run a specific batch (see [Running](#running)).
 
 `devices.txt` and failure reports are excluded from git so device IPs are not
 committed. Do not commit real IPs to `device_inventory.txt`.
@@ -72,8 +72,8 @@ The script exits immediately if the credentials are still set to `CHANGE_ME`.
 
 ```bash
 pip install requests
-python3 panos_bootstrap_update.py                          # uses devices.txt
-python3 panos_bootstrap_update.py device_inventory.txt     # uses a specific inventory file
+python3 panos_bootstrap_update.py                  # uses device_inventory.txt
+python3 panos_bootstrap_update.py batch1.txt       # uses a specific inventory file
 ```
 
 Exit code is `0` if every device succeeded, `1` if any failed.
